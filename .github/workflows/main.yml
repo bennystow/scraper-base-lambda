@@ -1,0 +1,71 @@
+# .github/workflows/deploy-to-ecr.yml
+name: deploy-image-to-ecr
+
+on:
+  push:
+    branches:
+      - main
+      - development
+
+env:
+  AWS_REGION: eu-west-2
+
+jobs:
+  test:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12" # Specify your Python version
+
+      - name: Run tests
+        # This command will discover and run tests in the 'tests' directory.
+        # The test_scraper.py includes a Docker build in its setUpClass,
+        # which is fine as Docker is available on ubuntu-latest runners.
+        run: python -m unittest discover tests
+
+  build_and_push:
+    name: Build and Push to ECR
+    runs-on: ubuntu-latest
+    needs: test # Ensures tests pass before building and pushing
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }} # Use a repository secret for the IAM role ARN
+          # Ensure this AWS_REGION is consistent or also made dynamic if needed
+          # For now, using a fixed one as per original.
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: base-scraper-lambda/dev
+          # Dynamically set ECR_REPOSITORY_NAME based on the branch
+          IMAGE_TAG: ${{ github.sha }} # Use the commit SHA as the image tag
+        # The working-directory should point to where your Dockerfile is located
+        # relative to the root of your repository after checkout.
+        working-directory: ./ # Assumes Dockerfile is at the repository root
+        run: |
+          IMAGE_NAME="$ECR_REGISTRY"
+          echo "Building and pushing image: $IMAGE_NAME with tags $IMAGE_TAG and latest"
+          docker build -t "$IMAGE_NAME:$IMAGE_TAG" -t "$IMAGE_NAME:latest" .
+          docker push "$IMAGE_NAME:$IMAGE_TAG"
+          docker push "$IMAGE_NAME:latest"
+          echo "Successfully pushed image: $IMAGE_NAME"

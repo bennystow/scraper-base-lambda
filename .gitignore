@@ -1,37 +1,130 @@
-# Local .terraform directories
-.terraform/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# .tfstate files
-*.tfstate
-*.tfstate.*
+# C extensions
+*.so
 
-# Crash log files
-crash.log
-crash.*.log
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.ruff_cache
 
-# Exclude all .tfvars files, which are likely to contain sensitive data, such as
-# password, private keys, and other secrets. These should not be part of version 
-# control as they are data points which are potentially sensitive and subject 
-# to change depending on the environment.
-*.tfvars
-*.tfvars.json
+# PyInstaller
+#  Usually these files are created by a PyInstaller script from a 'spec' file
+#  often using the pattern 'pyi-makespec --onefile --windowed myscript.py'
+#  and then the spec file is edited and built with 'pyinstaller myscript.spec'.
+*.spec
 
-# Ignore override files as they are usually used to override resources locally and so
-# are not checked in
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Ignore transient lock info files created by terraform apply
-.terraform.tfstate.lock.info
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+.hypothesis/
+pytest-report.html
 
-# Include override files you do wish to add to version control using negated pattern
-# !example_override.tf
+# Translations
+*.mo
+*.pot
 
-# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
-# example: *tfplan*
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
 
-# Ignore CLI configuration files
-.terraformrc
-terraform.rc
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat
+celerybeat-schedule
+
+# SageMath
+.sage/
+
+# Virtualenv
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+
+# VS Code
+.vscode/
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs
+.idea/
+
+# Logs and databases
+*.log
+*.db
+*.sqlite3
+
+# Temporary files
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+*.orig
+*.rej

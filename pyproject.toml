@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aws-lambda-base-selenium-scraper"
+version = "0.1.0"
+description = "Base Docker Image for lambda webscraping"
+requires-python = ">=3.12"
+dependencies = ["boto3", "selenium", "toml"]
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-cov"]
+lint = ["flake8", "black", "autopep8", "pre-commit"]
+
+[tool.autopep8]
+recursive = true
+in-place = true
+max_line_length = 88
