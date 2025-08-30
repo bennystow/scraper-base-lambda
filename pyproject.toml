@@ -6,14 +6,25 @@ build-backend = "setuptools.build_meta"
 name = "aws-lambda-base-selenium-scraper"
 version = "0.1.0"
 description = "Base Docker Image for lambda webscraping"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = ["boto3", "selenium", "toml"]
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov"]
-lint = ["flake8", "black", "autopep8", "pre-commit"]
+lint = ["ruff", "pre-commit"]
 
-[tool.autopep8]
-recursive = true
-in-place = true
-max_line_length = 88
+[tool.ruff]
+# Set the maximum line length to match black's default.
+line-length = 120
+# Set the target Python version to match your project.
+target-version = "py312"
+# Define the source directory for first-party import sorting.
+src = ["src"]
+
+[tool.ruff.lint]
+# Enable the default set of rules (pyflakes, pycodestyle) plus isort rules.
+select = ["E", "F", "I"]
+
+[tool.ruff.format]
+# Use black-compatible formatting.
+quote-style = "double"

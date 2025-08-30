@@ -37,4 +37,3 @@ $PipExecutable = Join-Path -Path $VenvDir -ChildPath "Scripts\pip.exe"
 Write-Host ""
 Write-Host "Environment setup complete!" -ForegroundColor Green
 Write-Host "To activate the virtual environment, run: .\$VenvDir\Scripts\Activate.ps1"
-

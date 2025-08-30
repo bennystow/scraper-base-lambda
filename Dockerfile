@@ -11,7 +11,7 @@ RUN dnf install -y atk cups-libs gtk3 libXcomposite alsa-lib \
     xorg-x11-xauth dbus-glib dbus-glib-devel nss mesa-libgbm jq unzip
 
 # Copy and run the chrome installer script
-COPY ./build/chrome-installer.sh ./chrome-installer.sh
+COPY ./scripts/chrome-installer.sh ./chrome-installer.sh
 RUN sed -i 's/\r$//' ./chrome-installer.sh
 RUN chmod +x ./chrome-installer.sh
 RUN ./chrome-installer.sh
@@ -27,7 +27,6 @@ ENV RUNNING_IN_DOCKER=true
 
 # Copy the src directory from the build context into the container at /var/task/src
 COPY src/ ./src/
-COPY static/combined_fixtures.json ./tmp/
 
 # Command to run the application
-CMD ["src.main"]
+CMD [ "python3", "-m", "src.main.handler" ]

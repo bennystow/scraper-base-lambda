@@ -1,6 +1,7 @@
-import os
 import logging
+import os
 from tempfile import mkdtemp
+
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 
@@ -26,9 +27,7 @@ def get_chrome_options(headless_override=None):
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--log-level=3")
     chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
-    run_headless = (
-        headless_override if headless_override is not None else is_running_in_docker()
-    )
+    run_headless = headless_override if headless_override is not None else is_running_in_docker()
 
     if run_headless:
         logger.info("Applying headless Chrome options.")

@@ -1,8 +1,10 @@
 import json
-import sys
 import logging
+import sys
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+
 from src.utils.utils import (
     get_chrome_options,
     get_chrome_service,
@@ -18,6 +20,38 @@ class ScrapingError(Exception):
     pass
 
 
+def handler(event, context):
+    """
+    AWS Lambda handler function.
+
+    This function is the entry point for the AWS Lambda execution. It
+    initializes logging, invokes the web scraper, and formats the output
+    (or any errors) into the response format expected by API Gateway.
+
+    :param event: The event dictionary passed by AWS Lambda.
+    :param context: The context object passed by AWS Lambda.
+    :return: A dictionary formatted for an API Gateway proxy response.
+    """
+    # Lambda runtime configures a default logger. We can just use it.
+    try:
+        # The scraping function returns a JSON string
+        result_json_string = scrape_h2_tags_from_webscraper_io()
+        return {
+            "statusCode": 200,
+            "headers": {"Content-Type": "application/json"},
+            "body": result_json_string,
+        }
+    except ScrapingError as e:
+        logger.error(f"A scraping error occurred: {e}")
+        return {"statusCode": 500, "body": json.dumps({"error": "Scraping failed", "details": str(e)})}
+    except Exception as e:
+        logger.critical(f"An unexpected error occurred in handler: {e}", exc_info=True)
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": "An internal server error occurred.", "details": str(e)}),
+        }
+
+
 def scrape_h2_tags_from_webscraper_io():
     """
     Scrapes H2 tags from https://webscraper.io/test-sites/tables.
@@ -26,49 +60,43 @@ def scrape_h2_tags_from_webscraper_io():
     Informational messages are printed to stderr.
     """
     if is_running_in_docker():
-        logger.info("INFO: main.py - Determined running in Docker environment.")
+        logger.info("Determined running in Docker environment.")
     else:
-        logger.info("INFO: main.py - Determined running in local environment.")
+        logger.info("Determined running in local environment.")
 
     driver = None
     try:
-        logger.info("INFO: Setting up Chrome WebDriver using utils configuration...")
-        driver = webdriver.Chrome(
-            service=get_chrome_service(), options=get_chrome_options()
-        )
-        logger.info("INFO: WebDriver setup complete.")
+        logger.info("Setting up Chrome WebDriver using utils configuration...")
+        driver = webdriver.Chrome(service=get_chrome_service(), options=get_chrome_options())
+        logger.info("WebDriver setup complete.")
 
         url = "https://webscraper.io/test-sites/tables"
-        logger.info(f"INFO: Navigating to {url}...")
+        logger.info(f"Navigating to {url}...")
         driver.get(url)
-        logger.info(f"INFO: Page '{driver.title}' loaded successfully.")
+        logger.info(f"Page '{driver.title}' loaded successfully.")
 
-        logger.info("INFO: Finding H2 elements...")
+        logger.info("Finding H2 elements...")
         h2_elements = driver.find_elements(By.TAG_NAME, "h2")
-        logger.info(f"INFO: Found {len(h2_elements)} H2 elements.")
+        logger.info(f"Found {len(h2_elements)} H2 elements.")
 
-        logger.info(f"\n--- H2 Tags from {url} (Info) ---")
+        logger.info(f"--- H2 Tags from {url} ---")
         if h2_elements:
             for index, h2 in enumerate(h2_elements):
                 logger.info(f"{index + 1}. {h2.text.strip()}")
         else:
             logger.info("No H2 tags found on the page.")
-        logger.info("\n--- End of H2 Tags (Info) ---")
+        logger.info("--- End of H2 Tags ---")
 
         return json.dumps({"h2_tags": [h2.text.strip() for h2 in h2_elements]})
 
     except Exception as e:
-        logger.error(
-            f"ERROR: An internal error occurred during the scraping process: {e}"
-        )
-        raise ScrapingError(
-            f"Failed to scrape H2 tags due to an internal error: {e}"
-        ) from e
+        logger.error(f"An internal error occurred during the scraping process: {e}")
+        raise ScrapingError(f"Failed to scrape H2 tags due to an internal error: {e}") from e
     finally:
         if driver:
-            logger.info("INFO: Closing WebDriver.")
+            logger.info("Closing WebDriver.")
             driver.quit()
-            logger.info("INFO: WebDriver closed.")
+            logger.info("WebDriver closed.")
 
 
 if __name__ == "__main__":
@@ -79,13 +107,15 @@ if __name__ == "__main__":
     )
 
     try:
-        json_output = scrape_h2_tags_from_webscraper_io()
-        print(json_output)
+        # Simulate a Lambda invocation
+        response = handler(event={}, context={})
+        # Pretty-print the JSON body of the response
+        print(json.dumps(json.loads(response["body"]), indent=2))
+        if response["statusCode"] != 200:
+            sys.exit(1)
     except ScrapingError as se:
         logger.error(f"Scraping failed: {se}")
         sys.exit(1)
     except Exception as e:
-        logger.critical(
-            f"An unexpected error occurred in main execution: {e}", exc_info=True
-        )
+        logger.critical(f"An unexpected error occurred in main execution: {e}", exc_info=True)
         sys.exit(1)
